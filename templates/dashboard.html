@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrimeSense Security Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px #00ff88; }
+            50% { opacity: 0.5; box-shadow: 0 0 15px #00ff88; }
+        }
+        .stats-bar {
+            display: flex;
+            gap: 40px;
+            padding: 25px 40px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ff88;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            padding: 20px 40px;
+        }
+        .panel {
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .panel-header {
+            background: #1f2937;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-title {
+            color: #58a6ff;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .panel-body {
+            padding: 20px;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .action-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .action-btn:hover {
+            background: #30363d;
+            border-color: #00ff88;
+            transform: translateY(-2px);
+        }
+        .action-btn .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .action-btn .label {
+            font-size: 0.9rem;
+            color: #8b949e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #1f2937;
+            color: #8b949e;
+            text-align: left;
+            padding: 12px 15px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #21262d;
+        }
+        tr:hover { background: #1c2128; }
+        .alert-row { border-left: 3px solid; }
+        .alert-critical { border-left-color: #ff4757; }
+        .alert-warning { border-left-color: #ffa502; }
+        .alert-info { border-left-color: #3498db; }
+        .event-type { font-weight: bold; color: #ff4757; }
+        .source { color: #58a6ff; }
+        .timestamp { color: #8b949e; font-size: 0.85rem; }
+        .detections { color: #ffa502; font-size: 0.85rem; }
+        .no-alerts {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+        .no-alerts svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #484f58;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense Command Center</h1>
+        <nav class="nav-links">
+            <a href="/" class="active">Dashboard</a>
+            <a href="/register">Register</a>
+            <a href="/surveillance/image">Image Surveillance</a>
+            <a href="/surveillance/video">Video Surveillance</a>
+            <a href="/camera">Camera</a>
+            <a href="/criminals">Criminals</a>
+        </nav>
+        <div class="status">
+            <div class="status-dot"></div>
+            <span>LIVE</span>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value" id="total-alerts">{{ alerts|length }}</div>
+            <div class="stat-label">Total Alerts</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="critical-count">0</div>
+            <div class="stat-label">Critical Events</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value" id="detection-count">0</div>
+            <div class="stat-label">Criminals Detected</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">OK</div>
+            <div class="stat-label">System Status</div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">&#128225; Live Alert Feed</span>
+                <span style="color: #8b949e; font-size: 0.8rem;">Auto-refresh: 3s</span>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Type</th>
+                            <th>Source</th>
+                            <th>Detections</th>
+                            <th>Received</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alerts-body">
+                        {% for alert in alerts %}
+                        <tr class="alert-row {% if 'critical' in alert.data.event_type|lower or 'intrusion' in alert.data.event_type|lower %}alert-critical{% elif 'warning' in alert.data.event_type|lower %}alert-warning{% else %}alert-info{% endif %}">
+                            <td><span class="event-type">{{ alert.data.event_type }}</span></td>
+                            <td><span class="source">{{ alert.data.source }}</span></td>
+                            <td class="detections">
+                                {% for d in alert.data.detections %}
+                                {{ d.name }} ({{ d.confidence }}%){% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td class="timestamp">{{ alert.received_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="no-alerts" id="no-alerts" {% if alerts %}style="display: none;"{% endif %}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    <div>No alerts received yet</div>
+                    <div style="font-size: 0.85rem; margin-top: 10px;">System is monitoring...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <span class="panel-title">&#9881; Quick Actions</span>
+            </div>
+            <div class="panel-body">
+                <div class="quick-actions">
+                    <a href="/register" class="action-btn">
+                        <div class="icon">&#128101;</div>
+                        <div>Add Criminal</div>
+                        <div class="label">Register new criminal</div>
+                    </a>
+                    <a href="/surveillance/image" class="action-btn">
+                        <div class="icon">&#128247;</div>
+                        <div>Image Check</div>
+                        <div class="label">Scan an image</div>
+                    </a>
+                    <a href="/surveillance/video" class="action-btn">
+                        <div class="icon">&#127909;</div>
+                        <div>Video Check</div>
+                        <div class="label">Scan a video</div>
+                    </a>
+                    <a href="/camera" class="action-btn">
+                        <div class="icon">&#128250;</div>
+                        <div>Live Camera</div>
+                        <div class="label">Camera monitoring</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        CrimeSense Security Command Center &bull; Last updated: <span id="last-updated"></span>
+    </div>
+
+    <script>
+        async function fetchAlerts() {
+            try {
+                const res = await fetch('/api/alerts/history');
+                const data = await res.json();
+                updateDashboard(data.alerts);
+                document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            } catch (e) {
+                console.error('Failed to fetch alerts:', e);
+            }
+        }
+
+        function updateDashboard(alerts) {
+            document.getElementById('total-alerts').textContent = alerts.length;
+
+            let criticalCount = 0;
+            let detectionCount = 0;
+
+            alerts.forEach(alert => {
+                const eventType = alert.data?.event_type || '';
+                if (eventType.includes('critical') || eventType.includes('intrusion')) {
+                    criticalCount++;
+                }
+                detectionCount += (alert.data?.detections?.length || 0);
+            });
+
+            document.getElementById('critical-count').textContent = criticalCount;
+            document.getElementById('detection-count').textContent = detectionCount;
+
+            const tbody = document.getElementById('alerts-body');
+            const noAlerts = document.getElementById('no-alerts');
+
+            if (alerts.length === 0) {
+                tbody.innerHTML = '';
+                noAlerts.style.display = 'block';
+                return;
+            }
+
+            noAlerts.style.display = 'none';
+            tbody.innerHTML = alerts.map(alert => {
+                const eventType = alert.data?.event_type || 'Unknown';
+                const source = alert.data?.source || 'Unknown';
+                const detections = alert.data?.detections || [];
+                const alertClass = eventType.includes('critical') || eventType.includes('intrusion') ? 'critical' : eventType.includes('warning') ? 'warning' : 'info';
+
+                return `
+                    <tr class="alert-row alert-${alertClass}">
+                        <td><span class="event-type">${eventType}</span></td>
+                        <td><span class="source">${source}</span></td>
+                        <td class="detections">${detections.length > 0 ? detections.map(d => `${d.name} (${d.confidence}%)`).join(', ') : '—'}</td>
+                        <td class="timestamp">${new Date(alert.received_at).toLocaleString()}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        fetchAlerts();
+        setInterval(fetchAlerts, 3000);
+    </script>
+</body>
+</html>

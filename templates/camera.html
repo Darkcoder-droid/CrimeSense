@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Monitoring - CrimeSense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .status-badge {
+            background: #00ff88;
+            color: #0a0e14;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-title {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .camera-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        .camera-feed {
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .feed-header {
+            background: #1f2937;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .feed-title {
+            color: #58a6ff;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .feed-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #00ff88;
+            font-size: 0.85rem;
+        }
+        .status-light {
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .feed-body {
+            padding: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d1117;
+        }
+        .upload-zone {
+            border: 2px dashed #30363d;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .upload-zone:hover {
+            border-color: #00ff88;
+        }
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .detections-panel {
+            background: #161b22;
+            border-radius: 8px;
+        }
+        .detections-header {
+            background: #1f2937;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .detections-title {
+            color: #58a6ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .detection-badge {
+            background: #ff4757;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .detections-body {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .detection-item {
+            background: #21262d;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff4757;
+        }
+        .detection-name {
+            color: #ff4757;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .detection-meta {
+            color: #8b949e;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        .no-detections {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+        .alert-history {
+            margin-top: 20px;
+        }
+        .alert-title {
+            color: #58a6ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message.success { background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; }
+        .message.error { background: rgba(255, 71, 87, 0.2); border: 1px solid #ff4757; color: #ff4757; }
+        .message.info { background: rgba(88, 166, 255, 0.2); border: 1px solid #58a6ff; color: #58a6ff; }
+        #message { margin-bottom: 20px; }
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense</h1>
+        <nav class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/register">Register</a>
+            <a href="/surveillance/image">Image Surveillance</a>
+            <a href="/surveillance/video">Video Surveillance</a>
+            <a href="/camera" class="active">Camera</a>
+            <a href="/criminals">Criminals</a>
+        </nav>
+        <span class="status-badge">IoT Mode</span>
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">&#128250; Camera Monitoring</h2>
+
+        <div id="message"></div>
+
+        <div class="camera-grid">
+            <div class="camera-feed">
+                <div class="feed-header">
+                    <span class="feed-title">Camera Feed</span>
+                    <span class="feed-status">
+                        <span class="status-light"></span>
+                        LIVE
+                    </span>
+                </div>
+                <div class="feed-body">
+                    <input type="file" id="frame-input" accept="image/*" capture="environment" style="display: none;">
+                    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('frame-input').click()">
+                        <div class="upload-icon">&#128247;</div>
+                        <div>Click to upload frame or capture from camera</div>
+                        <div style="color: #8b949e; margin-top: 10px; font-size: 0.85rem;">
+                            IoT devices can POST frames to /api/camera/detect
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detections-panel">
+                <div class="detections-header">
+                    <span class="detections-title">Recent Detections</span>
+                    <span class="detection-badge" id="detection-count">0</span>
+                </div>
+                <div class="detections-body" id="detections-body">
+                    <div class="no-detections">No detections yet</div>
+                </div>
+
+                <div class="alert-history">
+                    <div class="alert-title">Alert History (Last 10)</div>
+                    <div id="alert-history"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading">Analyzing frame...</div>
+    </div>
+
+    <script>
+        const frameInput = document.getElementById('frame-input');
+        const detectionsBody = document.getElementById('detections-body');
+        const detectionCount = document.getElementById('detection-count');
+        const alertHistory = document.getElementById('alert-history');
+        const loadingDiv = document.getElementById('loading');
+
+        let recentDetections = [];
+        let autoRefreshInterval = null;
+
+        frameInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            loadingDiv.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('frame', file);
+
+            try {
+                const response = await fetch('/api/camera/detect', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.detections && result.detections.length > 0) {
+                    addDetections(result.detections);
+                    showMessage('ALERT: Criminal detected!', 'error');
+                } else {
+                    showMessage('Frame scanned - no threats detected', 'info');
+                }
+            } catch (error) {
+                showMessage('Error processing frame', 'error');
+            }
+
+            loadingDiv.style.display = 'none';
+        });
+
+        function addDetections(detections) {
+            detections.forEach(d => {
+                recentDetections.unshift({
+                    name: d.name,
+                    confidence: d.confidence,
+                    time: new Date().toLocaleTimeString()
+                });
+            });
+
+            // Keep only last 10
+            recentDetections = recentDetections.slice(0, 10);
+
+            updateDetectionsUI();
+        }
+
+        function updateDetectionsUI() {
+            detectionCount.textContent = recentDetections.length;
+
+            if (recentDetections.length === 0) {
+                detectionsBody.innerHTML = '<div class="no-detections">No detections yet</div>';
+            } else {
+                detectionsBody.innerHTML = recentDetections.map(d => `
+                    <div class="detection-item">
+                        <div class="detection-name">&#9888; ${d.name}</div>
+                        <div class="detection-meta">
+                            Confidence: ${d.confidence}% | ${d.time}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update alert history on dashboard
+            alertHistory.innerHTML = recentDetections.slice(0, 5).map(d => `
+                <div style="padding: 8px; background: #21262d; border-radius: 4px; margin-bottom: 5px; font-size: 0.85rem;">
+                    <span style="color: #ff4757;">${d.name}</span>
+                    <span style="color: #8b949e;"> - ${d.time}</span>
+                </div>
+            `).join('') || '<div style="color: #8b949e;">No recent alerts</div>';
+        }
+
+        async function refreshAlerts() {
+            try {
+                const res = await fetch('/api/alerts/history');
+                const data = await res.json();
+
+                // Get camera-related detections
+                const cameraAlerts = data.alerts
+                    .filter(a => a.data.source && a.data.source.includes('Camera'))
+                    .slice(-10);
+
+                const allDetections = [];
+                cameraAlerts.forEach(a => {
+                    if (a.data.detections) {
+                        a.data.detections.forEach(d => {
+                            allDetections.push({
+                                name: d.name,
+                                confidence: d.confidence,
+                                time: new Date(a.received_at).toLocaleTimeString()
+                            });
+                        });
+                    }
+                });
+
+                if (allDetections.length > 0 && JSON.stringify(allDetections) !== JSON.stringify(recentDetections.slice(0, allDetections.length))) {
+                    recentDetections = allDetections.slice(0, 10);
+                    updateDetectionsUI();
+                }
+            } catch (e) {
+                console.error('Error refreshing alerts:', e);
+            }
+        }
+
+        // Auto-refresh every 5 seconds
+        setInterval(refreshAlerts, 5000);
+
+        function showMessage(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => { msgDiv.innerHTML = ''; }, 3000);
+        }
+    </script>
+</body>
+</html>

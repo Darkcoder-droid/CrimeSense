@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criminals - CrimeSense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-title {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .stats-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: #161b22;
+            padding: 20px 30px;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+        }
+        .stat-value {
+            font-size: 2rem;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .criminal-card {
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .criminal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+        }
+        .card-image {
+            width: 100%;
+            height: 200px;
+            background: #21262d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .card-name {
+            color: #ff4757;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .card-info {
+            color: #8b949e;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        .card-info span {
+            color: #e6edf3;
+        }
+        .card-crimes {
+            background: rgba(255, 71, 87, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ff4757;
+        }
+        .no-criminals {
+            text-align: center;
+            padding: 60px;
+            background: #161b22;
+            border-radius: 8px;
+        }
+        .no-criminals svg {
+            width: 80px;
+            height: 80px;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+        .no-criminals h3 {
+            color: #8b949e;
+            margin-bottom: 10px;
+        }
+        .no-criminals a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense</h1>
+        <nav class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/register">Register</a>
+            <a href="/surveillance/image">Image Surveillance</a>
+            <a href="/surveillance/video">Video Surveillance</a>
+            <a href="/camera">Camera</a>
+            <a href="/criminals" class="active">Criminals</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">&#128099; Registered Criminals</h2>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-value">{{ criminals|length }}</div>
+                <div class="stat-label">Total Registered</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ criminals|selectattr('crimes')|list|length }}</div>
+                <div class="stat-label">Active Watches</div>
+            </div>
+        </div>
+
+        {% if criminals %}
+        <div class="grid">
+            {% for criminal in criminals %}
+            <div class="criminal-card">
+                <div class="card-image">
+                    {% if criminal.profile_pic %}
+                    <img src="{{ criminal.profile_pic }}" alt="{{ criminal.name }}">
+                    {% else %}
+                    &#128100;
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="card-name">&#9888; {{ criminal.name }}</div>
+                    {% if criminal.father_name %}
+                    <div class="card-info">Father: <span>{{ criminal.father_name }}</span></div>
+                    {% endif %}
+                    {% if criminal.gender %}
+                    <div class="card-info">Gender: <span>{{ criminal.gender }}</span></div>
+                    {% endif %}
+                    {% if criminal.dob %}
+                    <div class="card-info">DOB: <span>{{ criminal.dob }}</span></div>
+                    {% endif %}
+                    {% if criminal.crimes %}
+                    <div class="card-crimes">&#9878; {{ criminal.crimes }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-criminals">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <circle cx="12" cy="7" r="4"/>
+                <path d="M5.5 21v-2a7 7 0 0 1 13 0v2"/>
+            </svg>
+            <h3>No criminals registered yet</h3>
+            <p style="color: #8b949e;">Add criminals using the <a href="/register">registration page</a></p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

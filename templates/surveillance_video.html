@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Surveillance - CrimeSense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-title {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .upload-section {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 60px;
+            text-align: center;
+            border: 2px dashed #30363d;
+            transition: all 0.3s;
+        }
+        .upload-section:hover {
+            border-color: #00ff88;
+        }
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background: #00ff88;
+            color: #0a0e14;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .upload-btn:hover {
+            background: #00cc6a;
+        }
+        .processing-panel {
+            display: none;
+            background: #161b22;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .processing-panel.active {
+            display: block;
+        }
+        .processing-header {
+            background: #1f2937;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #30363d;
+            border-top-color: #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .processing-title {
+            color: #00ff88;
+            font-size: 1rem;
+        }
+        .processing-body {
+            padding: 30px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .stat-box {
+            background: #21262d;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        .stat-label {
+            color: #8b949e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+        .results-section.active {
+            display: block;
+        }
+        .results-title {
+            color: #58a6ff;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+        .detection-item {
+            background: #21262d;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff4757;
+            display: flex;
+            justify-content: space-between;
+        }
+        .detection-name {
+            color: #ff4757;
+            font-weight: bold;
+        }
+        .detection-time {
+            color: #8b949e;
+            font-size: 0.85rem;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message.success { background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; }
+        .message.error { background: rgba(255, 71, 87, 0.2); border: 1px solid #ff4757; color: #ff4757; }
+        #message { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense</h1>
+        <nav class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/register">Register</a>
+            <a href="/surveillance/image">Image Surveillance</a>
+            <a href="/surveillance/video" class="active">Video Surveillance</a>
+            <a href="/camera">Camera</a>
+            <a href="/criminals">Criminals</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">&#127909; Video Surveillance</h2>
+
+        <div id="message"></div>
+
+        <div class="upload-section">
+            <div class="upload-icon">&#127909;</div>
+            <div>Upload a video to scan for criminal detection</div>
+            <div style="color: #8b949e; margin-top: 10px;">Supported formats: MP4, MKV, AVI, MOV</div>
+            <input type="file" id="video-input" accept="video/*" style="display: none;">
+            <button class="upload-btn" onclick="document.getElementById('video-input').click()">
+                Choose Video
+            </button>
+        </div>
+
+        <div class="processing-panel" id="processing-panel">
+            <div class="processing-header">
+                <div class="spinner"></div>
+                <span class="processing-title">Processing video...</span>
+            </div>
+            <div class="processing-body">
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="frames-processed">0</div>
+                        <div class="stat-label">Frames Processed</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="detections-found">0</div>
+                        <div class="stat-label">Detections</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="criminals-found">0</div>
+                        <div class="stat-label">Criminals</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="alert-sent">—</div>
+                        <div class="stat-label">Alert Status</div>
+                    </div>
+                </div>
+
+                <div class="results-section" id="results-section">
+                    <div class="results-title">Detected Criminals</div>
+                    <div id="results-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoInput = document.getElementById('video-input');
+        const processingPanel = document.getElementById('processing-panel');
+        const resultsSection = document.getElementById('results-section');
+
+        videoInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Show processing panel
+            processingPanel.classList.add('active');
+            resultsSection.classList.remove('active');
+
+            const formData = new FormData();
+            formData.append('video', file);
+
+            try {
+                const response = await fetch('/api/surveillance/video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('alert-sent').textContent = 'Sent';
+
+                    // Simulate progress (in real scenario, would poll for status)
+                    let frames = 0;
+                    const interval = setInterval(() => {
+                        frames += Math.floor(Math.random() * 10) + 5;
+                        document.getElementById('frames-processed').textContent = Math.min(frames, 300);
+                        if (frames >= 300) clearInterval(interval);
+                    }, 200);
+
+                    // Poll for results
+                    checkResults(result.video_id);
+                } else {
+                    showMessage(result.message || 'Processing failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+        });
+
+        async function checkResults(videoId) {
+            let attempts = 0;
+            const checkInterval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/alerts/history');
+                    const data = await res.json();
+
+                    const videoAlerts = data.alerts.filter(a =>
+                        a.data.video_id === videoId
+                    );
+
+                    if (videoAlerts.length > 0 || attempts > 30) {
+                        clearInterval(checkInterval);
+
+                        const allDetections = [];
+                        videoAlerts.forEach(a => {
+                            if (a.data.detections) {
+                                allDetections.push(...a.data.detections);
+                            }
+                        });
+
+                        displayResults(allDetections);
+                    }
+                } catch (e) {
+                    console.error('Error checking results:', e);
+                }
+                attempts++;
+            }, 500);
+        }
+
+        function displayResults(detections) {
+            document.getElementById('detections-found').textContent = detections.length;
+
+            const uniqueCriminals = [...new Set(detections.map(d => d.name))];
+            document.getElementById('criminals-found').textContent = uniqueCriminals.length;
+
+            if (uniqueCriminals.length > 0) {
+                resultsSection.classList.add('active');
+                document.getElementById('results-list').innerHTML = uniqueCriminals.map(name => `
+                    <div class="detection-item">
+                        <span class="detection-name">&#9888; ${name}</span>
+                        <span class="detection-time">Detected</span>
+                    </div>
+                `).join('');
+
+                showMessage(`ALERT: ${uniqueCriminals.length} criminal(s) found in video!`, 'success');
+            }
+        }
+
+        function showMessage(text, type) {
+            document.getElementById('message').innerHTML = `<div class="message ${type}">${text}</div>`;
+        }
+    </script>
+</body>
+</html>

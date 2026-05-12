@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Surveillance - CrimeSense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-title {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .upload-section {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            border: 2px dashed #30363d;
+            transition: all 0.3s;
+        }
+        .upload-section:hover {
+            border-color: #00ff88;
+        }
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background: #00ff88;
+            color: #0a0e14;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .upload-btn:hover {
+            background: #00cc6a;
+        }
+        .preview-container {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .preview-container.active {
+            display: grid;
+        }
+        .preview-panel {
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .preview-header {
+            background: #1f2937;
+            padding: 15px 20px;
+            color: #58a6ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .preview-body {
+            padding: 20px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .preview-body img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 5px;
+        }
+        .results-panel {
+            background: #161b22;
+            border-radius: 8px;
+        }
+        .results-header {
+            background: #1f2937;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .results-title {
+            color: #58a6ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .result-count {
+            background: #00ff88;
+            color: #0a0e14;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .results-body {
+            padding: 20px;
+        }
+        .detection-item {
+            background: #21262d;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff4757;
+        }
+        .detection-name {
+            color: #ff4757;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .detection-confidence {
+            color: #8b949e;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .no-detections {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message.success { background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; }
+        .message.error { background: rgba(255, 71, 87, 0.2); border: 1px solid #ff4757; color: #ff4757; }
+        #message { margin-bottom: 20px; }
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            color: #00ff88;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense</h1>
+        <nav class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/register">Register</a>
+            <a href="/surveillance/image" class="active">Image Surveillance</a>
+            <a href="/surveillance/video">Video Surveillance</a>
+            <a href="/camera">Camera</a>
+            <a href="/criminals">Criminals</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">&#128247; Image Surveillance</h2>
+
+        <div id="message"></div>
+
+        <div class="upload-section" id="upload-section">
+            <div class="upload-icon">&#128269;</div>
+            <div>Select an image to scan for criminal detection</div>
+            <input type="file" id="image-input" accept="image/*" style="display: none;">
+            <button class="upload-btn" onclick="document.getElementById('image-input').click()">
+                Choose Image
+            </button>
+        </div>
+
+        <div id="loading">Analyzing image...</div>
+
+        <div class="preview-container" id="preview-container">
+            <div class="preview-panel">
+                <div class="preview-header">Uploaded Image</div>
+                <div class="preview-body">
+                    <img id="preview-image" src="" alt="Preview">
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <div class="results-header">
+                    <span class="results-title">Detection Results</span>
+                    <span class="result-count" id="detection-count">0</span>
+                </div>
+                <div class="results-body" id="results-body">
+                    <div class="no-detections">No detections yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('image-input');
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        const resultsBody = document.getElementById('results-body');
+        const detectionCount = document.getElementById('detection-count');
+        const loadingDiv = document.getElementById('loading');
+        const messageDiv = document.getElementById('message');
+
+        imageInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.classList.add('active');
+            };
+            reader.readAsDataURL(file);
+
+            // Upload and process
+            loadingDiv.style.display = 'block';
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch('/api/surveillance/image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    displayResults(result.detections || []);
+                    if (result.watched_count > 0) {
+                        showMessage(`ALERT: ${result.watched_count} criminal(s) detected and alert sent!`, 'success');
+                    }
+                } else {
+                    showMessage(result.message || 'Processing failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+
+            loadingDiv.style.display = 'none';
+        });
+
+        function displayResults(detections) {
+            detectionCount.textContent = detections.length;
+
+            if (detections.length === 0) {
+                resultsBody.innerHTML = '<div class="no-detections">&#10004; No criminals detected</div>';
+                return;
+            }
+
+            resultsBody.innerHTML = detections.map(d => `
+                <div class="detection-item">
+                    <div class="detection-name">&#9888; ${d.name}</div>
+                    <div class="detection-confidence">Confidence: ${d.confidence}%</div>
+                </div>
+            `).join('');
+        }
+
+        function showMessage(text, type) {
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+        }
+    </script>
+</body>
+</html>

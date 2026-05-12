@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Criminal - CrimeSense</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e14;
+            color: #e6edf3;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%);
+            border-bottom: 2px solid #00ff88;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00ff88;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        .nav-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+        .page-title {
+            color: #00ff88;
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .panel {
+            background: #161b22;
+            border-radius: 8px;
+            padding: 30px;
+        }
+        .panel-title {
+            color: #58a6ff;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #8b949e;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group label .required {
+            color: #ff4757;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            color: #e6edf3;
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #00ff88;
+            color: #0a0e14;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            background: #00cc6a;
+            transform: translateY(-2px);
+        }
+        .image-upload-zone {
+            border: 2px dashed #30363d;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .image-upload-zone:hover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+        .image-upload-zone .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: #21262d;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-item .remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message.success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+        .message.error {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>&#9889; CrimeSense</h1>
+        <nav class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/register" class="active">Register</a>
+            <a href="/surveillance/image">Image Surveillance</a>
+            <a href="/surveillance/video">Video Surveillance</a>
+            <a href="/camera">Camera</a>
+            <a href="/criminals">Criminals</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h2 class="page-title">&#128101; Register New Criminal</h2>
+
+        <div id="message"></div>
+
+        <form id="register-form" method="POST" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="panel">
+                    <h3 class="panel-title">Personal Information</h3>
+
+                    <div class="form-group">
+                        <label>Name <span class="required">*</span></label>
+                        <input type="text" name="name" required placeholder="Enter full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Father's Name</label>
+                        <input type="text" name="father_name" placeholder="Enter father's name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" name="dob">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Crimes Committed</label>
+                        <input type="text" name="crimes" placeholder="e.g., Theft, Fraud">
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3 class="panel-title">Images <span class="required">*</span> (Min 5)</h3>
+
+                    <div class="image-upload-zone" id="upload-zone">
+                        <div class="icon">&#128247;</div>
+                        <div>Click or drag images here</div>
+                        <div style="color: #8b949e; margin-top: 10px; font-size: 0.85rem;">Supports: JPG, PNG, JPEG</div>
+                        <input type="file" id="images" name="images" multiple accept="image/*" style="display: none;">
+                    </div>
+
+                    <div class="image-preview" id="preview"></div>
+
+                    <div id="loading">Processing images...</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button type="submit" class="submit-btn">&#128279; Register Criminal</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const uploadZone = document.getElementById('upload-zone');
+        const imageInput = document.getElementById('images');
+        const preview = document.getElementById('preview');
+        const form = document.getElementById('register-form');
+        const messageDiv = document.getElementById('message');
+        const loadingDiv = document.getElementById('loading');
+
+        uploadZone.addEventListener('click', () => imageInput.click());
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#00ff88';
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '#30363d';
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageInput.files = e.dataTransfer.files;
+            handleFiles();
+        });
+
+        imageInput.addEventListener('change', handleFiles);
+
+        function handleFiles() {
+            preview.innerHTML = '';
+            const files = Array.from(imageInput.files);
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `<img src="${e.target.result}" alt="Preview ${index + 1}">`;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (imageInput.files.length < 5) {
+                showMessage('Please select at least 5 images', 'error');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/register/criminal', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    showMessage(result.message, 'success');
+                    form.reset();
+                    preview.innerHTML = '';
+                } else {
+                    showMessage(result.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            }
+
+            loadingDiv.style.display = 'none';
+        });
+
+        function showMessage(text, type) {
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+        }
+    </script>
+</body>
+</html>
