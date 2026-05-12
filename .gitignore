@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Firebase / Secrets
+serviceAccountKey.json
+
+# Data files (Sensitive / Large)
+*.csv
+*.pickle
+*.zip
+*.xml
+!haarcascade_frontalface_default.xml
+!face_cascade.xml
+
+# Project directories
+face_samples/
+profile_pics/
+uploads/
+test_videos/
+Other/
+camera_input/
+
+# Environment
+.env
+venv/
+env/
