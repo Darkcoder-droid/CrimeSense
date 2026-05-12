@@ -18,6 +18,8 @@ serviceAccountKey.json
 # Data files (Sensitive / Large)
 *.csv
 *.pickle
+*.picke
+*.mp4
 *.zip
 *.xml
 !haarcascade_frontalface_default.xml
