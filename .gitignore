@@ -25,9 +25,9 @@ serviceAccountKey.json
 
 # Project directories
 face_samples/
-profile_pics/
+profile_pics*/
 uploads/
-test_videos/
+test_videos*/
 Other/
 camera_input/
 
